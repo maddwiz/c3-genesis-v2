@@ -1,216 +1,429 @@
-# C.3 MASTER HANDOFF (v2, Spark Rig)
+# C.3 Genesis v2 — Master H9andoff
 
 Owner: Desmond  
 Repo: `c3-genesis-v2`  
-Mode: MVP Skeleton + Dual-Brain + Memory + Forge v1
+Date: 2025-11-19  
+Status: MVP spine in place (no big models wired yet, safe to extend)
 
-This file tells any new chat window:
-- What C.3 is right now
-- What files exist and what they do
-- What is safe/stable
-- What to build next (in order)
+This file is for **new chat windows** and future you.  
+It explains:
 
----
-
-## 0. HIGH-LEVEL SNAPSHOT
-
-C.3 is a **local, sovereign cognitive OS** with:
-
-- Dual-brain architecture:
-  - ArchitectBrain = logical / planner
-  - OracleBrain    = creative / explorer
-- Emotion engine that modulates both brains
-- Memory Spine + diff tools for identity over time
-- Meta-C3 simulator for safe self-testing
-- Forge v1 for self-improvement (proposing code diffs)
-- Intrinsic Motivation Engine v0.1 (chemical-style curiosity)
-
-This repo is **v2**, a clean skeleton.  
-The older, heavier experiments live in the original `c3-genesis` repo and are treated as an archive.
+- What C.3 is (v2)
+- How the repo is structured
+- What is already implemented
+- What is planned but NOT built yet
+- How to safely evolve the code without breaking the vision
 
 ---
 
-## 1. DIRECTORY MAP (CURRENT STATE)
+## 0. What C.3 Is (v2)
 
-### 1.1 Core
+C.3 is a **local, sovereign cognitive OS**, not “just a chatbot”.
 
-**`core/`**
+Core ideas:
 
-- `core/context.py`  
-  - Defines the minimal C.3 context object (config, mode, etc.).
-  - Used by C3Core and Meta-C3.
-- `core/c3_core.py`  
-  - High-level “brain” orchestrator for Architect + Oracle + Reconcile + Memory.
-- `core/runner.py`  
-  - Simple CLI entrypoint to run C.3 on a task (MVP demo).
+- **Dual-brain reasoning**  
+  - ArchitectBrain → slow, logical, planner
+  - OracleBrain → fast, creative, divergent
+  - Reconcile layer blends them.
 
-**`core/interfaces/`**
+- **Markovian Reasoning Engine (MRE)**  
+  - Long reasoning is split into chunks.
+  - A “carry-over summary” (COS) passes forward between chunks instead of reloading full history.
 
-- `core/interfaces/brain_interface.py`  
-  - Base class for all “brains” (ArchitectBrain, OracleBrain).
-  - Exposes `generate(prompt: str) -> str` as the standard API.
+- **Memory Spine v2**  
+  - Local JSONL memory that logs events, thoughts, and state.
+  - Used for continuity and later continual learning.
 
-- `core/interfaces/context_interface.py`  
-  - Base interface for context objects (clone, read-only access, etc.).
-  - Used by Meta-C3 Simulator.
+- **Emotions & Motivation (v0.1)**  
+  - Chemical-like signals: dopamine, serotonin, cortisol, focus.
+  - Motivation engine will modulate how the dual-brain behaves on each task.
 
----
+- **Forge v1**  
+  - Self-improvement engine.
+  - Reads code, suggests small changes, and writes them to a “staging” file instead of auto-editing.
 
-### 1.2 Reasoning (Dual-Brain + Emotions)
+- **Meta-C3 stub**  
+  - A way to “simulate C.3 on a task” in a sandbox without touching real state.  
+  - Future hook for recursive self-modeling.
 
-**`reasoning/`**
+All of this is designed to run:
 
-- `reasoning/architect.py`  
-  - ArchitectBrain (logical / structured reasoning brain).
-  - Currently a stub:
-    - `generate(prompt)` → `[ARCH] Logical reasoning for: ...`
-    - `think(task)` → wrapper around `generate(task)` for backwards compatibility.
-  - In Phase 2, this will call a real local model (e.g., Qwen, Llama).
-
-- `reasoning/oracle.py`  
-  - OracleBrain (creative / exploratory brain).
-  - Currently a stub:
-    - `generate(prompt)` → `[ORACLE] Creative idea for: ...`
-    - `think(task)` → wrapper around `generate(task)`.
-
-- `reasoning/emotions.py`  
-  - EmotionEngine:
-    - Tracks simple chemical-style signals: dopamine, serotonin, norepinephrine, oxytocin.
-    - Computes temperatures for Architect and Oracle.
-    - Used by Reconcile to bias decisions.
-
-- `reasoning/reconcile.py`  
-  - Reconcile engine:
-    - Takes Architect + Oracle outputs + emotions.
-    - Decides who “wins” for this step.
-    - Outputs:
-      - choice (architect/oracle)
-      - rationale
-      - updated emotions
-      - architect_temperature
-      - oracle_temperature
-      - final_text (for user / downstream tools).
-
-- `reasoning/mre.py`  
-  - Markovian Reasoning Engine (MRE) v1 skeleton.
-  - Chunked reasoning with carry-over summaries (COS).
-  - Will integrate with Memory Spine and Compression later.
+- **fully offline**
+- **inside your DGX / local machine**
+- with **open models** later wired in.
 
 ---
 
-### 1.3 Memory
+## 1. Repo Layout (Authoritative for v2)
 
-**`memory/`**
+High-level directory map (this is the structure new windows should trust):
 
-- `memory/spine.py`  
-  - Memory Spine v2 (MVP):
-    - Append-only log of events.
-    - In-memory index for now (future: SQLite + vector index).
-    - Basic `add_event`, `get_events`, etc.
+- `bootstrap.py`  
+  - Entry point for CLI demos and tools.
 
-- `memory/diff.py`  
-  - Memory diff tools:
-    - Compare snapshots of events.
-    - Powers the “memory diff” CLI tool.
+- `core/`
+  - `__init__.py`
+  - `brain_selector.py` → Decides which brain(s) to use.
+  - `c3_core.py` → Orchestrator tying together brains, MRE, motivation, etc.
+  - `interfaces/brain_interface.py` → Base class / contract for any brain.
+  - `runner.py` → Simple runner used by MVP demo.
+
+- `reasoning/`
+  - `__init__.py`
+  - `architect.py` → ArchitectBrain implementation (logic).
+  - `oracle.py` → OracleBrain implementation (creative).
+  - `mre.py` → Markovian Reasoning Engine (chunked reasoning + COS).
+  - `emotions.py` → Chemical state (dopamine, serotonin, cortisol, focus).
+  - `reconcile.py` → Reconcile outputs from Architect + Oracle, using emotions/motivation.
+
+- `memory/`
+  - `__init__.py`
+  - `spine.py` → Memory Spine v2 (JSONL, append-only events).
+  - `diff.py` → Compare two memory files (old vs new, etc.).
+  - `events.jsonl`, `memory.jsonl` → Example data for demos.
+  - `test_events.jsonl`, `test_memory.py` → Small tests / harnesses.
+
+- `curiosity/`
+  - `__init__.py`
+  - `curiosity.py` → Frontier queue + curiosity stubs.
+  - `motivation.py` → MotivationEngine v0.1 (turns task + chemicals into a MotivationState).
+
+- `forge/`
+  - `forge.py` → Forge v1 orchestrator (self-improvement engine).
+  - `pr.py` → Helper functions for “PR-like” suggestions.
+  - `staging.json` → Where Forge records suggested changes.
+
+- `meta/`
+  - `__init__.py`
+  - `c3_sim.py` → Meta-C3 stub (simulate C.3 on a task).
+  - `c3_sim_cli.py` → CLI wrapper to call Meta-C3 from the terminal.
+  - `cove.py` → Verification / budget stubs (for meta-verification later).
+
+- `models/`
+  - `local_backend.py` → Abstraction over whatever model backend we use locally (e.g., vLLM, llama.cpp, etc.).
+  - `local_text_model.py` → Simple text model wrapper (currently stubbed).
+
+- `narrative/`
+  - `__init__.py`
+  - `engine.py` → Narrative engine stubs (chapters, storyline over time).
+
+- `simulation/`
+  - `.keep` → Folder created, not yet used. Reserved for future world/simulation logic.
+
+- `tooling/`
+  - `tools.py` → Shared tool helpers (logging, printing, timing, etc.).
+
+- `tools/` (CLI tools)
+  - `__init__.py`
+  - `demo_mvp.py` → MVP demo: runs dual-brain reasoning on a sample task.
+  - `c3_memory_diff.py` → CLI wrapper for memory diff.
+  - `forge_suggest.py` → Runs Forge v1 to suggest a small code change.
+  - `test_motivation.py` → Quick test harness for MotivationEngine.
+
+- `handoff/`
+  - `.keep`
+  - `C3_MASTER_HANDOFF.md` → This file.
+  - `C3_FILEMAP.json` → Machine-friendly map of important files.
+  - `C3_CHANGELOG.md` → Evolution log (what changed, when, why).
+
+- `docs/`
+  - Currently mirrors some of the handoff docs.  
+  - For v2: **`handoff/` is authoritative**.  
+    `docs/` can be used for extended docs, but new logic should be documented in `handoff/` first.
+
+- `.gitignore`
+  - Ensures `.venv/`, big libs, and other junk are **not tracked**.
+
+- `README.md`
+  - High-level description of the project (can be expanded later).
 
 ---
 
-### 1.4 Tools / CLI
+## 2. Cognitive Architecture (Layer View)
 
-**`tools/`**
+For future reference, these are the **conceptual layers** C.3 is built around:
 
-- `tools/c3_memory_diff.py`  
-  - CLI:
-    - `python3 -m tools.c3_memory_diff`  
-      → prints a simple diff between two snapshots (placeholder).
-  - Uses `memory/spine.py` + `memory/diff.py`.
+1. **Interface Layer**  
+   - CLI, (later) UI, voice, user profile.
 
----
+2. **Perception Layer**  
+   - Text parsing now; OCR / multimodal later.
 
-### 1.5 Meta / Simulation
+3. **Memory Layer**  
+   - Memory Spine v2, Memory Diff, MRE integration.
 
-**`meta/`**
+4. **Reasoning Layer**  
+   - ArchitectBrain, OracleBrain, MRE, Reconcile.
 
-- `meta/c3_sim.py`  
-  - Meta-C3 simulator:
-    - Clones context.
-    - Runs Architect + Oracle + Reconcile in **simulation mode**.
-    - Does NOT touch real memory/state.
-    - Returns a structured trace (JSON-like dict).
+5. **Curiosity Layer**  
+   - Frontier queue, unknown detection.
 
-- `meta/c3_sim_cli.py`  
-  - CLI:
-    - `python3 -m meta.c3_sim_cli "your task"`  
-    - Runs a simulation and prints a pretty JSON result.
+6. **Learning Layer** (future)  
+   - EML, Skill Capsules, Meta-Lab.
 
----
+7. **Tooling & Action Layer**  
+   - Code execution, shell tools, API calls.
 
-### 1.6 Forge (Self-Improvement)
+8. **Mesh Orchestration Layer** (future)  
+   - Distributed jobs, node credits, etc.
 
-**`forge/`**
+9. **Sovereignty Layer** (future)  
+   - Guardian Law, permissions, failsafes.
 
-- `forge/pr.py`  
-  - Forge v1 — Auto-PR Simulator (MVP):
-    - Takes `old_text` and `new_text` of a file.
-    - Computes a unified diff.
-    - Appends suggestion to `forge/staging.json`.
-    - Does **NOT** auto-apply changes yet (safety).
-  - CLI:
-    - `python3 -m forge.pr old.txt new.txt target_file.py`
+10. **Self-Reflection Layer** (future expansion of current meta/CoVe)  
+    - Meta-thinking about strategies and mistakes.
 
----
+11. **Simulation Layer** (future)  
+    - Multi-world “what-if” sandbox.
 
-### 1.7 Curiosity / Motivation
+12. **Compression Layer** (future)  
+    - Concept cards, event horizon compression.
 
-**`curiosity/`**
+13. **Emotion / Value Layer**  
+    - Chemicals, value estimation, priority.
 
-- `curiosity/motivation.py`  
-  - Intrinsic Motivation Engine v0.1:
-    - Reads chemical signals:
-      - dopamine, serotonin, norepinephrine, oxytocin.
-    - Generates small internal goals like:
-      - `explore_new_skill`
-      - `simplify_internal_plan`
-      - `continue_current_task`
-      - `improve_companion_dialogue`
-      - or neutral self-improvement actions.
-    - Exposes a singleton `motivation_engine`.
+14. **Concept Fusion Layer** (future)  
+    - Cross-domain creativity.
+
+15. **Strategic Autonomy Layer** (future)  
+    - Goal-setting, task graphs, long-horizon planning.
+
+Not all of these layers are fully implemented yet, but the file layout is designed to evolve into this structure.
 
 ---
 
-## 2. WHAT IS STABLE VS EXPERIMENTAL
+## 3. What Is Already Implemented (MVP-Level)
 
-**Stable (do NOT casually rewrite):**
+### 3.1 Dual-Brain + MRE + Emotions
 
-- `core/context.py`
-- `core/interfaces/brain_interface.py`
-- `core/interfaces/context_interface.py`
-- `reasoning/emotions.py`
-- `reasoning/reconcile.py`
-- `meta/c3_sim.py`
-- `meta/c3_sim_cli.py`
-- `memory/spine.py`
-- `memory/diff.py`
-- `tools/c3_memory_diff.py`
-- `forge/pr.py`
-- `curiosity/motivation.py`
+Implemented:
 
-**Flexible / can be expanded but keep the shape:**
-
-- `core/c3_core.py`
-- `core/runner.py`
 - `reasoning/architect.py`
 - `reasoning/oracle.py`
 - `reasoning/mre.py`
+- `reasoning/emotions.py`
+- `reasoning/reconcile.py`
+- `core/brain_selector.py`
+- `core/c3_core.py`
+- `core/runner.py`
+
+Capabilities:
+
+- Run Architect + Oracle on a task.
+- Use MRE to support longer reasoning via summaries.
+- Maintain a simple chemical state.
+- Reconcile outputs into a final answer (MVP logic).
+
+### 3.2 Memory Spine v2 + Diff
+
+Implemented:
+
+- `memory/spine.py`
+- `memory/diff.py`
+- `tools/c3_memory_diff.py`
+- `memory/events.jsonl`, `memory/memory.jsonl`, `memory/test_events.jsonl`
+- `memory/test_memory.py`
+
+Capabilities:
+
+- Append events to a JSONL memory file.
+- Compare two memory snapshots and show differences.
+- Use as backend for demos showing “C.3 remembers”.
+
+### 3.3 Curiosity + Motivation v0.1
+
+Implemented:
+
+- `curiosity/curiosity.py`
+- `curiosity/motivation.py`
+- `tools/test_motivation.py`
+
+Capabilities:
+
+- Basic curiosity stubs.
+- MotivationEngine that:
+  - Takes a task + chemicals.
+  - Outputs a MotivationState.
+- Test script to poke it and print out results.
+
+### 3.4 Forge v1 + CLI
+
+Implemented:
+
+- `forge/forge.py`
+- `forge/pr.py`
+- `forge/staging.json`
+- `tools/forge_suggest.py`
+
+Capabilities:
+
+- Inspect a target file (e.g. `reasoning/reconcile.py`).
+- Generate a tiny “suggested” change.
+- Write suggestions out to a `*.suggested.py` file and/or JSON staging.
+
+### 3.5 Meta-C3 Stub + CLI
+
+Implemented:
+
+- `meta/c3_sim.py`
+- `meta/c3_sim_cli.py`
+- `meta/cove.py` (stubs)
+
+Capabilities:
+
+- Simulated C.3 runs in sandbox mode (MVP-level).
+- CoVe stubs prepare for later meta-verification and budgets.
+
+### 3.6 MVP Demo Script
+
+Implemented:
+
+- `tools/demo_mvp.py`
+- `bootstrap.py`
+
+Capabilities:
+
+- Run a small MVP demo from the terminal:
+  - Dual-brain reasoning on a toy task.
+  - Show per-brain outputs and reconciled result.
+  - Show some state (chemicals, motivation, etc).
 
 ---
 
-## 3. CURRENT MVP DEMOS
+## 4. What Is NOT Implemented Yet (Important)
 
-These should work without real models (using stubs):
+These ideas are **planned** but not yet built (or only partially stubbed).  
+New windows must **not assume** they exist:
 
-1. **Meta-C3 Simulation**
+- Real model wiring:
+  - `models/local_backend.py` and `models/local_text_model.py` are stubs.
+  - No real LLM is hooked up yet.
+
+- Full Motivation wiring:
+  - MotivationEngine exists, but c3_core / reconcile may still treat chemicals mostly as neutral.
+  - We eventually want task → motivation → modulated brain behavior.
+
+- Narrative auto-chaptering:
+  - `narrative/engine.py` is still minimal.
+  - No automated “chapters” from long memory timelines yet.
+
+- Mesh / node credits / Lightning:
+  - Mesh layer and real payments are not built yet.
+  - Only concepts are reserved; no code exists.
+
+- Advanced Self-Reflection / Evaluation:
+  - `meta/cove.py` is a placeholder.
+  - No real meta-verification logic yet.
+
+- Sim / world model:
+  - `simulation/` is empty (except `.keep`).
+  - No world model, no Monte Carlo search, no Dreamer-like sims yet.
+
+When any of these land, they should be added to `handoff/C3_CHANGELOG.md` with date + status.
+
+---
+
+## 5. How to Run the Main Demos (for Future You / New Windows)
+
+From the project root (`~/c3-genesis-v2`), with your virtualenv active:
+
+1. **MVP Dual-Brain Demo**
+
+   ```bash
+   python -m tools.demo_mvp
+
+	2.	Memory Diff Demo
+python -m tools.c3_memory_diff
+
+3.	Motivation Test
+python -m tools.test_motivation
+
+4.	Forge Suggestion Demo
+python -m meta.c3_sim_cli
+
+5.	Meta-C3 Sim Demo
+python -m meta.c3_sim_cli
+
+If any of these fail in the future, fix them before adding new complexity.
+
+⸻
+
+6. Rules for Future Changes (Do Not Break These)
+
+To keep C.3 coherent across windows:
+	1.	Do not track .venv/ or big binaries
+	•	.gitignore already handles this — don’t remove those rules.
+	2.	Always update handoff + changelog after major changes
+	•	If you add a new file or change behavior in a big way:
+	•	Update handoff/C3_FILEMAP.json
+	•	Append a section to handoff/C3_CHANGELOG.md
+	3.	Never silently delete core modules
+	•	If you deprecate a file:
+	•	Note it explicitly in the changelog.
+	4.	Keep tools working
+	•	tools/demo_mvp.py, tools/c3_memory_diff.py, tools/forge_suggest.py should always work.
+	•	They are the “health check” for the system.
+	5.	Small, surgical changes
+	•	Prefer tiny PR-like changes:
+	•	E.g. tweak one function, then test.
+	•	Avoid massive refactors in a single jump.
+
+⸻
+
+7. Short Build Order (Next Steps)
+
+If a new window needs to know “what to build next”, this is the priority:
+	1.	Tighten MVP demo and motivation wiring
+	•	Make sure motivation is clearly visible in demo output.
+	•	Use chemicals to change behavior (e.g., more exploratory vs more conservative).
+	2.	Wire a real local model into models/local_text_model.py
+	•	Start with a tiny open model that fits easily on the DGX.
+	•	Connect brains to that backend cleanly.
+	3.	Steady Forge v1
+	•	Ensure Forge suggestions are safe, small, and easy to diff.
+	•	Optionally add a “review” step that prints suggestions clearly.
+	4.	Narrative v0.1
+	•	From Memory Spine, auto-generate very simple “chapters” to summarize time ranges.
+	5.	Meta-C3 improvements
+	•	Make meta/c3_sim.py use the same core flows as the main C.3, but in a fully sandboxed context.
+
+Only after these are stable should you move on to:
+	•	Mesh / node credits
+	•	Deeper world model
+	•	Advanced self-reflection and evaluation
+	•	Lightning payments, neuromorphic ports, etc.
+
+⸻
+
+8. How New Windows Should Sync
+
+When a new chat window starts and needs repo context, it should:
+	1.	Read this file first:
+	•	handoff/C3_MASTER_HANDOFF.md
+	2.	Then load the file map:
+	•	handoff/C3_FILEMAP.json
+	3.	Then read the changelog:
+	•	handoff/C3_CHANGELOG.md
+	4.	Only then, open specific files mentioned as important (e.g. core/c3_core.py, reasoning/reconcile.py, etc.), instead of trying to read the whole repo.
+
+This keeps token usage low and continuity high.
+
+⸻
+
+End of Master Handoff v2
+
+If you drastically change architecture, bump the version and document it here.
+
+
+1. In your DGX terminal:
 
    ```bash
    cd ~/c3-genesis-v2
-   python3 -m meta.c3_sim_cli "test the dual brain"
+   nano handoff/C3_MASTER_HANDOFF.md
+
+	2.	Hold Ctrl+A then Ctrl+K a bunch to delete everything (or just backspace until empty).
+	3.	Paste the big block above (from # C.3 Genesis v2 — Master Handoff all the way to the end).
+	4.	Press Ctrl+O, then Enter to save.
+	5.	Press Ctrl+X to exit nano.
+

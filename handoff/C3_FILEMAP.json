@@ -1,26 +1,69 @@
 {
+  "version": "0.2-mvp",
+  "root": {
+    "bootstrap.py": "Main CLI entrypoint for running core C.3 and helper tools",
+    "README.md": "Top-level overview of the C.3 Genesis v2 project"
+  },
+  "core": {
+    "c3_core.py": "Core C.3 orchestrator (ties brains, memory, motivation, tools together)",
+    "runner.py": "Simple CLI runner used by demo_mvp to execute C.3 on a task",
+    "brain_selector.py": "Logic for choosing Architect, Oracle, or both for a request",
+    "interfaces/brain_interface.py": "Shared interface for brain implementations and backends"
+  },
   "reasoning": {
-    "architect.py": "stable_core",
-    "oracle.py": "stable_core",
-    "reconcile.py": "stable_core",
-    "__init__.py": "stable_core"
+    "architect.py": "ArchitectBrain: slow, logical, planner-style reasoning",
+    "oracle.py": "OracleBrain: fast, creative, divergent reasoning",
+    "mre.py": "Markovian Reasoning Engine (MRE) for chunked context + carry-over summaries",
+    "reconcile.py": "Reconcile layer that merges Architect + Oracle using chemicals/emotions",
+    "emotions.py": "Emotion/chemical model (dopamine, serotonin, cortisol, focus) that modulates temperature and style"
+  },
+  "curiosity": {
+    "curiosity.py": "Curiosity layer stubs (frontier queue, unknowns wiring)",
+    "motivation.py": "Motivation engine v0.1 that turns chemicals + task into a motivation state"
   },
   "memory": {
-    "spine.py": "stable_core",
-    "diff.py": "stable_core",
-    "test_memory.py": "stable_core",
-    "__init__.py": "stable_core"
+    "spine.py": "Memory Spine v2 (local JSONL store for long-term events and identity)",
+    "diff.py": "Memory diff tool that compares old vs new memory/event files",
+    "events.jsonl": "Sample events for testing the spine and diff logic",
+    "memory.jsonl": "Sample memory data for spine/diff testing",
+    "test_events.jsonl": "Extra test events for memory diff tool",
+    "test_memory.py": "Small test harness for the memory spine and diff"
+  },
+  "narrative": {
+    "engine.py": "Narrative engine v0 stub (chapters and story-of-self hooks)"
   },
   "meta": {
-    "__init__.py": "stable_core",
-    "cove.py": "stable_core"
+    "c3_sim.py": "Meta-C.3 stub: simulate C.3 on a task in a sandbox context",
+    "c3_sim_cli.py": "CLI wrapper to run meta simulations from the command line",
+    "cove.py": "CoVe / verification budget stubs for meta-verification and safety"
+  },
+  "forge": {
+    "forge.py": "Forge v1 core: coordinates self-improvement and code suggestions",
+    "pr.py": "Forge PR helper that proposes small code changes to staged files",
+    "staging.json": "Staging area metadata for suggested changes from Forge"
+  },
+  "models": {
+    "local_backend.py": "Backend abstraction for local models (CPU/GPU, provider-agnostic)",
+    "local_text_model.py": "Tiny local text model wrapper used for early offline experiments"
+  },
+  "tooling": {
+    "tools.py": "Utility helpers shared across tools (logging, basic config, etc.)"
+  },
+  "tools": {
+    "__init__.py": "Exposes CLI helper tools as a small toolkit package",
+    "c3_memory_diff.py": "CLI tool: compare two memory/event files and show differences",
+    "demo_mvp.py": "Main MVP demo script: runs dual-brain + motivation on a sample task",
+    "forge_suggest.py": "CLI to call Forge and generate a suggested change to reconcile.py",
+    "test_motivation.py": "Tiny script to exercise the motivation engine and print chemicals"
+  },
+  "docs": {
+    "C3_MASTER_HANDOFF.md": "High-level architecture, build order, and current state of C.3",
+    "C3_FILEMAP.json": "Alternate file map in docs (human-readable copy of this handoff map)",
+    "C3_CHANGELOG.md": "Long-form changelog for docs (mirrors the handoff changelog at a high level)"
   },
   "handoff": {
-    "C3_MASTER_HANDOFF.md": "stable_meta",
-    "C3_FILEMAP.json": "stable_meta",
-    "C3_CHANGELOG.md": "stable_meta"
-  },
-  "root": {
-    "README.md": "todo"
+    "C3_MASTER_HANDOFF.md": "Primary handoff document new chat windows will read first",
+    "C3_FILEMAP.json": "This file: machine-friendly map of important files and their roles",
+    "C3_CHANGELOG.md": "Short, focused changelog for repo evolution and window syncing"
   }
 }
