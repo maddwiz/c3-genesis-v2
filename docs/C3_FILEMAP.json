@@ -1,0 +1,24 @@
+{
+  "docs": {
+    "C3_MASTER_HANDOFF.md": "Master explainer of C.3 v2 architecture and build status.",
+    "C3_FILEMAP.json": "Index of important files and their stability.",
+    "C3_CHANGELOG.md": "Version/migration history for c3-genesis-v2."
+  },
+  "reasoning": {
+    "architect.py": "ArchitectBrain (logic brain) — STABLE v0.1",
+    "oracle.py": "OracleBrain (creative brain) — STABLE v0.1",
+    "emotions.py": "EmotionEngine v1 (dopamine/serotonin/norepinephrine/oxytocin) — STABLE v0.1",
+    "reconcile.py": "ReconcileResult + reconcile() — Dual-brain merger with emotion-modulated temps — STABLE v0.1",
+    "__init__.py": "Marks reasoning as a Python package."
+  },
+  "memory": {
+    "spine.py": "Memory Spine v2 — JSONL append-only long-term memory store — STABLE v0.1",
+    "diff.py": "Memory Diff Engine v2 — diff_since() / diff_from_timestamp() / pretty_print() — STABLE v0.1",
+    "events.jsonl": "Data file — appended at runtime by MemorySpine. DO NOT COMMIT SENSITIVE CONTENT.",
+    "__init__.py": "Marks memory as a Python package."
+  },
+  "tools": {
+    "c3_memory_diff.py": "CLI tool for viewing memory diffs (uses memory.diff). — STABLE v0.1",
+    "__init__.py": "Marks tools as a Python package."
+  }
+}

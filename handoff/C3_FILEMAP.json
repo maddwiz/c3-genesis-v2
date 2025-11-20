@@ -1,0 +1,26 @@
+{
+  "reasoning": {
+    "architect.py": "stable_core",
+    "oracle.py": "stable_core",
+    "reconcile.py": "stable_core",
+    "__init__.py": "stable_core"
+  },
+  "memory": {
+    "spine.py": "stable_core",
+    "diff.py": "stable_core",
+    "test_memory.py": "stable_core",
+    "__init__.py": "stable_core"
+  },
+  "meta": {
+    "__init__.py": "stable_core",
+    "cove.py": "stable_core"
+  },
+  "handoff": {
+    "C3_MASTER_HANDOFF.md": "stable_meta",
+    "C3_FILEMAP.json": "stable_meta",
+    "C3_CHANGELOG.md": "stable_meta"
+  },
+  "root": {
+    "README.md": "todo"
+  }
+}

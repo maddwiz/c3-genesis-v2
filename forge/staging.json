@@ -1,0 +1,13 @@
+[
+  {
+    "file": "target_file.py",
+    "rationale": "Auto-improvement proposal",
+    "diff": [
+      "--- old\n",
+      "+++ new\n",
+      "@@ -1 +1 @@\n",
+      "-print('hello from old version')\n",
+      "+print('hello from NEW version')\n"
+    ]
+  }
+]
